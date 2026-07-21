@@ -3,6 +3,10 @@
   <title>Honcho Shared Memory</title>
   <script type="module">
     import { store } from "/components/plugins/plugin-settings-store.js";
+    import { apiRequest } from "/js/api.js";
+    import { toastFrontendSuccess, toastFrontendError, toastFrontendWarning } from "/components/notifications/notification-store.js";
+
+    window._honchoImport = { apiRequest, toastFrontendSuccess, toastFrontendError, toastFrontendWarning };
   </script>
   <style>
     .honcho-settings { display: grid; gap: 16px; max-width: 760px; }
@@ -16,122 +20,189 @@
     .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-button-bg, #444); color: var(--color-text); font-size: 0.85rem; }
     .btn-primary { background: #4F46E5; border-color: #4F46E5; color: #fff; }
     .btn-danger { background: #b91c1c; border-color: #b91c1c; color: #fff; }
-    pre { background: #111; padding: 8px; border-radius: 6px; font-size: 0.8rem; color: #aaa; }
   </style>
 </head>
 <body>
-  <div x-data>
-    <template x-if="$store.honchoSharedMemoryStore">
-      <div class="honcho-settings">
-        <!-- Secret status -->
-        <div class="honcho-group">
-          <legend>Authentication</legend>
-          <div class="field">
-            <label>Secret Name: <strong>HONCHO_DB_PASSWORD</strong></label>
-            <span x-text="$store.honchoSharedMemoryStore.secretStatus">Checking...</span>
-          </div>
-        </div>
+  <div x-data="honchoSettingsData()" class="honcho-settings">
+    <!-- Secret status -->
+    <div class="honcho-group">
+      <legend>Authentication</legend>
+      <div class="field">
+        <label>Secret Name: <strong>HONCHO_DB_PASSWORD</strong></label>
+        <span x-text="secretStatus">Checking...</span>
+      </div>
+    </div>
 
-        <!-- Connection -->
-        <div class="honcho-group">
-          <legend>Connection</legend>
-          <div class="field">
-            <label>Honcho Base URL</label>
-            <input type="text" x-model="config.honcho_base_url">
-          </div>
-          <div class="field">
-            <label>Connection Mode</label>
-            <select x-model="config.connection_mode">
-              <option value="local">Local</option>
-              <option value="lan">LAN</option>
-              <option value="remote">Remote / Private Server</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Request Timeout (seconds)</label>
-            <input type="number" x-model="config.request_timeout">
-          </div>
-          <div class="field">
-            <label>Max Retries</label>
-            <input type="number" x-model="config.max_retries">
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.tls_verify">
-            <label>TLS verify</label>
-          </div>
-        </div>
+    <!-- Connection -->
+    <div class="honcho-group">
+      <legend>Connection</legend>
+      <div class="field">
+        <label>Honcho Base URL</label>
+        <input type="text" x-model="config.honcho_base_url">
+      </div>
+      <div class="field">
+        <label>Connection Mode</label>
+        <select x-model="config.connection_mode">
+          <option value="local">Local</option>
+          <option value="lan">LAN</option>
+          <option value="remote">Remote / Private Server</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Request Timeout (seconds)</label>
+        <input type="number" x-model="config.request_timeout">
+      </div>
+      <div class="field">
+        <label>Max Retries</label>
+        <input type="number" x-model="config.max_retries">
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.tls_verify">
+        <label>TLS verify</label>
+      </div>
+    </div>
 
-        <!-- Workspace & Identity -->
-        <div class="honcho-group">
-          <legend>Workspace & Identity</legend>
-          <div class="field">
-            <label>Honcho Workspace ID</label>
-            <input type="text" x-model="config.honcho_workspace_id">
-          </div>
-          <div class="field">
-            <label>Honcho Peer ID</label>
-            <input type="text" x-model="config.honcho_peer_id">
-          </div>
-          <div class="field">
-            <label>Current Agent ID</label>
-            <input type="text" x-model="config.agent_id">
-          </div>
-        </div>
+    <!-- Workspace & Identity -->
+    <div class="honcho-group">
+      <legend>Workspace & Identity</legend>
+      <div class="field">
+        <label>Honcho Workspace ID</label>
+        <input type="text" x-model="config.honcho_workspace_id">
+      </div>
+      <div class="field">
+        <label>Honcho Peer ID</label>
+        <input type="text" x-model="config.honcho_peer_id">
+      </div>
+      <div class="field">
+        <label>Current Agent ID</label>
+        <input type="text" x-model="config.agent_id">
+      </div>
+    </div>
 
-        <!-- Actions -->
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-primary" @click="$store.honchoSharedMemoryStore.testConnection()">Test Connection</button>
-          <button class="btn" @click="$store.honchoSharedMemoryStore.viewDiagnostics()">View Diagnostics</button>
-          <button class="btn btn-danger" @click="$store.honchoSharedMemoryStore.resetDefaults()">Reset to Defaults</button>
-        </div>
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" @click="testConnection">Test Connection</button>
+      <button class="btn" @click="viewDiagnostics">View Diagnostics</button>
+      <button class="btn btn-danger" @click="resetDefaults">Reset to Defaults</button>
+    </div>
 
-        <!-- Multi-agent -->
-        <div class="honcho-group">
-          <legend>Multi-Agent</legend>
-          <div class="inline">
-            <input type="checkbox" x-model="config.multi_agent_mode">
-            <label>Enable multi-agent shared memory</label>
-          </div>
-          <div x-show="config.multi_agent_mode">
-            <label>Allowed Agent IDs (comma-separated)</label>
-            <input type="text" x-model="config.allowed_agent_ids_string" placeholder="e.g. agent-zero-0, agent-zero-1">
-          </div>
-        </div>
-
-        <!-- Automation -->
-        <div class="honcho-group">
-          <legend>Automation & Privacy</legend>
-          <div class="inline">
-            <input type="checkbox" x-model="config.auto_retrieval">
-            <label>Auto retrieval</label>
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.auto_store">
-            <label>Auto store (Warning: stores conversation)</label>
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.store_user_messages">
-            <label>Store user messages</label>
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.store_assistant_messages">
-            <label>Store assistant messages</label>
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.store_tool_output">
-            <label>Store tool output</label>
-          </div>
-          <div class="inline">
-            <input type="checkbox" x-model="config.redact_secrets_before_store">
-            <label>Redact secrets before store</label>
-          </div>
-          <div class="field">
-            <label>Max stored content length</label>
-            <input type="number" x-model="config.max_stored_content_length">
-          </div>
+    <!-- Multi-agent -->
+    <div class="honcho-group">
+      <legend>Multi-Agent</legend>
+      <div class="inline">
+        <input type="checkbox" x-model="config.multi_agent_mode">
+        <label>Enable multi-agent shared memory</label>
+      </div>
+      <div x-show="config.multi_agent_mode">
+        <div class="field">
+          <label>Allowed Agent IDs (comma-separated)</label>
+          <input type="text" x-model="config.allowed_agent_ids_string" placeholder="e.g. agent-zero-0, agent-zero-1">
         </div>
       </div>
-    </template>
+    </div>
+
+    <!-- Automation & Privacy -->
+    <div class="honcho-group">
+      <legend>Automation & Privacy</legend>
+      <div class="inline">
+        <input type="checkbox" x-model="config.auto_retrieval">
+        <label>Auto retrieval</label>
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.auto_store">
+        <label>Auto store (Warning: stores conversation)</label>
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.store_user_messages">
+        <label>Store user messages</label>
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.store_assistant_messages">
+        <label>Store assistant messages</label>
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.store_tool_output">
+        <label>Store tool output</label>
+      </div>
+      <div class="inline">
+        <input type="checkbox" x-model="config.redact_secrets_before_store">
+        <label>Redact secrets before store</label>
+      </div>
+      <div class="field">
+        <label>Max stored content length</label>
+        <input type="number" x-model="config.max_stored_content_length">
+      </div>
+      <div x-show="config.multi_agent_mode">
+        <div class="inline">
+          <input type="checkbox" x-model="config.include_shared_agent_memories">
+          <label>Include shared agent memories in retrieval</label>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script>
+    function honchoSettingsData() {
+      return {
+        secretStatus: "Checking...",
+        diagnostics: null,
+
+        async init() {
+          this.checkSecretStatus();
+        },
+
+        async checkSecretStatus() {
+          try {
+            const res = await window._honchoImport.apiRequest("GET", "/api/plugins/honcho_shared_memory/secret_status");
+            if (res.ok) {
+              const data = await res.json();
+              this.secretStatus = data.configured ? "✅ Configured" : "❌ Missing";
+            } else {
+              this.secretStatus = "⚠️ Unknown";
+            }
+          } catch {
+            this.secretStatus = "⚠️ Error checking";
+          }
+        },
+
+        async testConnection() {
+          window._honchoImport.toastFrontendWarning("Testing connection...", "Honcho");
+          try {
+            const res = await window._honchoImport.apiRequest("POST", "/api/plugins/honcho_shared_memory/test_connection");
+            const data = await res.json();
+            this.diagnostics = data;
+            if (data.success) {
+              window._honchoImport.toastFrontendSuccess(data.message || "Connection successful", "Honcho");
+            } else {
+              window._honchoImport.toastFrontendError(data.message || "Connection failed", "Honcho");
+            }
+          } catch (e) {
+            window._honchoImport.toastFrontendError("Connection test error: " + e.message, "Honcho");
+          }
+        },
+
+        viewDiagnostics() {
+          if (this.diagnostics) {
+            const diagText = JSON.stringify(this.diagnostics, null, 2);
+            window._honchoImport.toastFrontendWarning("Diagnostics:\n" + diagText, "Honcho");
+          } else {
+            window._honchoImport.toastFrontendWarning("No diagnostics available. Run 'Test Connection' first.", "Honcho");
+          }
+        },
+
+        resetDefaults() {
+          if (confirm("Reset all settings to defaults?")) {
+            // trigger the modal's reset mechanism if available
+            this.dispatch(new CustomEvent("honcho-reset"));
+            window._honchoImport.toastFrontendWarning("Settings reset requested. Save to persist.", "Honcho");
+          }
+        },
+
+        dispatch(event) {
+          document.dispatchEvent(event);
+        },
+      };
+    }
+  </script>
 </body>
 </html>

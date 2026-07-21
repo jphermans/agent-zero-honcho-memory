@@ -1,6 +1,6 @@
 """API handler to test Honcho connection."""
 
-from flask import jsonify, request
+from flask import jsonify
 from helpers.api import ApiHandler
 from helpers.plugins import get_plugin_config
 from helpers.secrets import get_secrets_manager
@@ -49,6 +49,10 @@ class TestConnectionHandler(ApiHandler):
 
 
 class SecretStatusHandler(ApiHandler):
+
+    @classmethod
+    def get_methods(cls):
+        return ["GET"]
 
     def get(self):
         """Check whether the HONCHO_DB_PASSWORD secret is configured."""
