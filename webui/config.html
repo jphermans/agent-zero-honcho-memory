@@ -37,7 +37,20 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                 });
+                if (!res) {
+                    window._honcho.toastFrontendError('No response from server. Check plugin is enabled and settings saved.', 'Honcho');
+                    return;
+                }
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    window._honcho.toastFrontendError('Server error ' + res.status + (text ? ': ' + text.slice(0, 200) : ''), 'Honcho');
+                    return;
+                }
                 const data = await res.json();
+                if (!data) {
+                    window._honcho.toastFrontendError('Empty response from server.', 'Honcho');
+                    return;
+                }
                 this.diagnostics = data;
                 if (data.success) {
                     window._honcho.toastFrontendSuccess(data.message || 'Connection successful', 'Honcho');
@@ -45,7 +58,7 @@
                     window._honcho.toastFrontendError(data.message || 'Connection failed', 'Honcho');
                 }
             } catch (e) {
-                window._honcho.toastFrontendError('Connection test error: ' + e.message, 'Honcho');
+                window._honcho.toastFrontendError('Connection test error: ' + (e.message || 'Unknown error'), 'Honcho');
             }
         },
 
