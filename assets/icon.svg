@@ -1,29 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="db" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="db2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6366F1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <!-- Database cylinder -->
-  <ellipse cx="200" cy="100" rx="100" ry="40" fill="url(#db)" opacity="0.9"/>
-  <rect x="100" y="100" width="200" height="180" fill="url(#db)" opacity="0.85"/>
-  <ellipse cx="200" cy="280" rx="100" ry="40" fill="url(#db2)" opacity="0.95"/>
-  <ellipse cx="200" cy="100" rx="100" ry="40" fill="none" stroke="#A78BFA" stroke-width="3"/>
-  <line x1="100" y1="100" x2="100" y2="280" stroke="#A78BFA" stroke-width="3"/>
-  <line x1="300" y1="100" x2="300" y2="280" stroke="#A78BFA" stroke-width="3"/>
-  <!-- Agent nodes -->
-  <circle cx="370" cy="140" r="28" fill="#10B981" stroke="#fff" stroke-width="3"/>
-  <circle cx="430" cy="220" r="28" fill="#10B981" stroke="#fff" stroke-width="3"/>
-  <circle cx="370" cy="300" r="28" fill="#10B981" stroke="#fff" stroke-width="3"/>
-  <!-- Connections from database to nodes -->
-  <line x1="300" y1="140" x2="342" y2="140" stroke="#A78BFA" stroke-width="4"/>
-  <line x1="300" y1="220" x2="402" y2="220" stroke="#A78BFA" stroke-width="4"/>
-  <line x1="300" y1="280" x2="342" y2="280" stroke="#A78BFA" stroke-width="4" transform="translate(0,20)"/>
-  <!-- Brain/memory motif subtle -->
-  <path d="M360 280 Q360 310 400 310 Q440 310 440 280" fill="none" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+  <rect width="512" height="512" fill="none"/>
+  <ellipse cx="256" cy="180" rx="60" ry="20" fill="#5a9cf5"/>
+  <rect x="196" y="180" width="120" height="120" fill="#4285F4"/>
+  <ellipse cx="256" cy="300" rx="60" ry="20" fill="#2b6fcf"/>
+  <circle cx="256" cy="100" r="35" fill="#34A853" stroke="#fff" stroke-width="2"/>
+  <circle cx="256" cy="100" r="10" fill="#fff" opacity="0.8"/>
+  <circle cx="160" cy="260" r="35" fill="#FBBC04" stroke="#fff" stroke-width="2"/>
+  <circle cx="160" cy="260" r="10" fill="#fff" opacity="0.8"/>
+  <circle cx="350" cy="260" r="35" fill="#EA4335" stroke="#fff" stroke-width="2"/>
+  <circle cx="350" cy="260" r="10" fill="#fff" opacity="0.8"/>
+  <line x1="256" y1="135" x2="256" y2="170" stroke="#bdbdbd" stroke-width="3"/>
+  <line x1="195" y1="260" x2="196" y2="200" stroke="#bdbdbd" stroke-width="3"/>
+  <line x1="315" y1="260" x2="316" y2="200" stroke="#bdbdbd" stroke-width="3"/>
 </svg>

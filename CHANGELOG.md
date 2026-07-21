@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3] - 2026-07-21
+
+### Changed
+- New plugin icon: database cylinder with three connected agent nodes (SVG + PNG 512px + PNG 128px).
+- Rewritten README.md with colorful shields.io badges, emoji sections, and architecture diagram.
+- Added Hermes-Agent and OpenClaw compatibility badges to README.
+- Added troubleshooting table to README.
+
 ## [0.0.2] - 2026-07-21
 
 ### Fixed
