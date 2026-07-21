@@ -2,12 +2,11 @@
 <head>
     <title>Honcho Shared Memory</title>
     <script type="module">
-        import { apiRequest } from "/js/api.js";
+        import { fetchApi } from "/js/api.js";
         import { toastFrontendSuccess, toastFrontendError, toastFrontendWarning } from "/components/notifications/notification-store.js";
-        window._honcho = { apiRequest, toastFrontendSuccess, toastFrontendError, toastFrontendWarning };
+        window._honcho = { fetchApi, toastFrontendSuccess, toastFrontendError, toastFrontendWarning };
     </script>
 </head>
-
 <body>
     <div x-data="{
         secretStatus: 'Checking...',
@@ -19,7 +18,7 @@
 
         async checkSecretStatus() {
             try {
-                const res = await window._honcho.apiRequest('GET', '/api/plugins/honcho_shared_memory/secret_status');
+                const res = await window._honcho.fetchApi('/api/plugins/honcho_shared_memory/secret_status');
                 if (res.ok) {
                     const data = await res.json();
                     this.secretStatus = data.configured ? '✅ Configured' : '❌ Missing';
@@ -34,7 +33,10 @@
         async testConnection() {
             window._honcho.toastFrontendWarning('Testing connection...', 'Honcho');
             try {
-                const res = await window._honcho.apiRequest('POST', '/api/plugins/honcho_shared_memory/test_connection');
+                const res = await window._honcho.fetchApi('/api/plugins/honcho_shared_memory/test_connection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
                 const data = await res.json();
                 this.diagnostics = data;
                 if (data.success) {
@@ -73,13 +75,13 @@
                 <!-- Authentication -->
                 <div class="field">
                     <div class="field-label">
-                        <div class="field-title">Secret Name: HONCHO_DB_PASSWORD</div>
+                        <div class="field-title">Secret: HONCHO_DB_PASSWORD</div>
                         <div class="field-description">
                             Status of the Honcho DB password secret.
                         </div>
                     </div>
                     <div class="field-control">
-                        <span class="field-status-text" style="font-size: 0.9rem;" x-text="secretStatus">Checking...</span>
+                        <span x-text="secretStatus">Checking...</span>
                     </div>
                 </div>
 
