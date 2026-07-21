@@ -21,6 +21,8 @@
 
 ---
 
+> **🤖 This plugin was entirely written by the AI assistant Agent Zero (A0).**
+
 ## ✨ Features
 
 | Feature | Description |
