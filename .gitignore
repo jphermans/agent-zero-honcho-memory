@@ -36,6 +36,7 @@ tmp/
 .cache/
 
 # Local plugin configuration
+config.json
 config.local.*
 settings.local.*
 test-results/

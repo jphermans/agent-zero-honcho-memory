@@ -67,14 +67,14 @@
 
 ```bash
 # In Agent Zero, go to Plugins → Install from Git:
-https://github.com/jphermans/agent-zero-honcho-memory.git
+https://github.com/your-username/agent-zero-honcho-memory.git
 ```
 
 ### Manual
 
 ```bash
 cd /a0/usr/plugins
-git clone https://github.com/jphermans/agent-zero-honcho-memory.git honcho_shared_memory
+git clone https://github.com/your-username/agent-zero-honcho-memory.git honcho_shared_memory
 ```
 
 Then **restart Agent Zero** to load the plugin.
@@ -101,7 +101,7 @@ Open **Settings → Agent → Honcho Shared Memory** and fill in:
 
 | Field | Example | Description |
 |-------|---------|-------------|
-| **Honcho Base URL** | `http://192.168.188.198:8000` | Full URL to your Honcho API |
+| **Honcho Base URL** | `http://your-honcho-server:8000` | Full URL to your Honcho API |
 | **Connection Mode** | `LAN` | Local, LAN, or Remote |
 | **Honcho Workspace ID** | `hermes` | The shared memory namespace |
 | **Honcho Peer ID** | `hermes` | Identity within the workspace |
