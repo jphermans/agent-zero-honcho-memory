@@ -51,6 +51,10 @@ class HonchoConfig(BaseModel):
         le=50000,
         description="Max characters of memory content to inject"
     )
+    agent_compatibility: Literal["agent-zero", "hermes-agent", "openclaw"] = Field(
+        default="agent-zero",
+        description="Agent compatibility mode for cross-agent memory sharing"
+    )
     minimum_relevance: float = Field(
         default=0.0,
         ge=0.0,

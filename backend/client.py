@@ -155,16 +155,23 @@ class HonchoClient:
         session_id: str,
         peer_id: str,
         messages: List[Dict[str, Any]],
+        skip_metadata: bool = False,
     ):
-        """Add messages to a session. Creates session and peer if needed."""
+        """Add messages to a session. Creates session and peer if needed.
+
+        Args:
+            skip_metadata: If True, omit metadata from messages (Hermes/OpenClaw compatibility).
+        """
         session = self.get_or_create_session(session_id, peer_id)
         formatted = []
         for m in messages:
-            formatted.append({
+            entry = {
                 "peer_id": peer_id,
                 "content": m.get("content", ""),
-                "metadata": m.get("metadata"),
-            })
+            }
+            if not skip_metadata and m.get("metadata"):
+                entry["metadata"] = m["metadata"]
+            formatted.append(entry)
         return session.add_messages(messages=formatted)
 
     def search_messages(
@@ -174,10 +181,16 @@ class HonchoClient:
         peer_id: str,
         limit: int = 10,
         filters: Optional[Dict[str, Any]] = None,
+        skip_filters: bool = False,
     ):
-        """Search messages in a session."""
+        """Search messages in a session.
+
+        Args:
+            skip_filters: If True, ignore metadata filters (Hermes/OpenClaw compatibility).
+        """
         session = self.get_or_create_session(session_id, peer_id)
-        return session.search(query=query, filters=filters, limit=limit)
+        effective_filters = filters if not skip_filters else None
+        return session.search(query=query, filters=effective_filters, limit=limit)
 
     def get_session_messages(
         self,

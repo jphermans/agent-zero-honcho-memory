@@ -192,6 +192,26 @@
                     </div>
                 </div>
 
+                <!-- Agent Compatibility -->
+                <div class="field">
+                    <div class="field-label">
+                        <div class="field-title">Agent Compatibility</div>
+                        <div class="field-description">
+                            Adjusts metadata and filtering to match another agent's Honcho conventions.
+                            <br><b>Agent Zero:</b> Full metadata tagging and agent_id filtering.
+                            <br><b>Hermes-Agent:</b> Uses aiPeer as storage peer, skips metadata filtering (no agent_id tags).
+                            <br><b>OpenClaw:</b> Sender_id→peer mapping, no custom metadata.
+                        </div>
+                    </div>
+                    <div class="field-control">
+                        <select x-model="config.agent_compatibility">
+                            <option value="agent-zero">Agent Zero (default)</option>
+                            <option value="hermes-agent">Hermes-Agent</option>
+                            <option value="openclaw">OpenClaw</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="section-title">Actions</div>
                 <div class="field" style="display:flex; gap:10px;">

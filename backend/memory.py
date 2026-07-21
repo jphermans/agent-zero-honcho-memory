@@ -53,6 +53,13 @@ def is_memory_worthy(content: str, role: str, config: dict) -> bool:
     return True
 
 
+# Represents the current compatibility mode
+def _is_delegated_mode(config: dict) -> bool:
+    """Check if we're delegating metadata to the other agent's conventions."""
+    comp = config.get("agent_compatibility", "agent-zero")
+    return comp in ("hermes-agent", "openclaw")
+
+
 def generate_metadata(
     agent_id: str,
     workspace_id: str,
@@ -63,9 +70,22 @@ def generate_metadata(
     tags: Optional[List[str]] = None,
     sharing_scope: str = "single",
     source_message_id: Optional[str] = None,
+    compatibility: str = "agent-zero",
 ) -> Dict[str, Any]:
-    """Generate deterministic metadata for a stored memory."""
+    """Generate deterministic metadata for a stored memory.
+
+    In delegated modes (hermes-agent, openclaw), returns minimal metadata
+    to match the conventions of those agents (no custom metadata fields).
+    """
     now = datetime.datetime.utcnow().isoformat()
+    if compatibility in ("hermes-agent", "openclaw"):
+        # Minimal metadata matching native Honcho conventions
+        meta = {
+            "role": role,
+            "stored_at": now,
+        }
+        return meta
+
     meta = {
         "plugin_version": PLUGIN_VERSION,
         "agent_id": agent_id,
@@ -129,7 +149,7 @@ def format_memory_context(
     for mem in memories:
         content = getattr(mem, 'content', str(mem))
         meta = getattr(mem, 'metadata', {})
-        agent = meta.get("agent_id", "unknown") if isinstance(meta, dict) else "unknown"
+        agent = meta.get("agent_id", "memory") if isinstance(meta, dict) else "memory"
         ts = meta.get("stored_at", "") if isinstance(meta, dict) else ""
 
         header = f"### Memory from {agent}"

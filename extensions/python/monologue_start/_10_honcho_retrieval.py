@@ -57,18 +57,20 @@ class HonchoAutoRetrieval(Extension):
                 tls_verify=set.get("tls_verify", True),
             )
 
-            # Build filters based on multi-agent mode
+            # Build filters based on multi-agent mode and compatibility
+            from usr.plugins.honcho_shared_memory.backend.memory import _is_delegated_mode
             filters = {}
-            if set.get("multi_agent_mode") and set.get("include_shared_agent_memories"):
-                allowed = set.get("allowed_agent_ids", [])
-                current = set.get("agent_id", "agent-zero-0")
-                if current not in allowed:
-                    allowed.append(current)
-                # Note: Honcho filter uses metadata; we'll filter agent_id
-                if allowed:
-                    filters["agent_id"] = ",".join(allowed)
-            else:
-                filters["agent_id"] = set.get("agent_id", "agent-zero-0")
+            is_delegated = _is_delegated_mode(set)
+            if not is_delegated:
+                if set.get("multi_agent_mode") and set.get("include_shared_agent_memories"):
+                    allowed = set.get("allowed_agent_ids", [])
+                    current = set.get("agent_id", "agent-zero-0")
+                    if current not in allowed:
+                        allowed.append(current)
+                    if allowed:
+                        filters["agent_id"] = ",".join(allowed)
+                else:
+                    filters["agent_id"] = set.get("agent_id", "agent-zero-0")
 
             # Search
             results = client.search_messages(
@@ -77,6 +79,7 @@ class HonchoAutoRetrieval(Extension):
                 peer_id=set["honcho_peer_id"],
                 limit=set.get("retrieval_limit", 10),
                 filters=filters if filters else None,
+                skip_filters=is_delegated,
             )
 
             if not results:

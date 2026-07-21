@@ -11,6 +11,7 @@ connection_mode: local
 tls_verify: true
 multi_agent_mode: false
 allowed_agent_ids: []
+agent_compatibility: agent-zero
 auto_retrieval: true
 auto_store: false
 store_user_messages: false
