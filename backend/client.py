@@ -3,11 +3,16 @@
 import logging
 from typing import Optional, Dict, Any, List
 from honcho import Honcho
-from honcho._client import (
-    APIError, AuthenticationError as HonchoAuthError,
-    ConnectionError as HonchoConnError, TimeoutError as HonchoTimeoutError,
-    NotFoundError, PermissionDeniedError, RateLimitError as HonchoRateLimitError,
-    ConflictError, ServerError,
+from honcho import (
+    APIError,
+    AuthenticationError as HonchoAuthError,
+    ConnectionError as HonchoConnError,
+    TimeoutError as HonchoTimeoutError,
+    NotFoundError,
+    PermissionDeniedError,
+    RateLimitError as HonchoRateLimitError,
+    ConflictError,
+    ServerError,
 )
 
 from usr.plugins.honcho_shared_memory.backend.exceptions import (
