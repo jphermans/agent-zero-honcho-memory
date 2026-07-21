@@ -170,10 +170,10 @@
 
                 <div class="field">
                     <div class="field-label">
-                        <div class="field-title">Honcho Peer ID</div>
-                        <div class="field-description">
-                            The peer identifier for this workspace.
-                        </div>
+                        <div class="field-title"
+                            x-text="config.agent_compatibility === 'hermes-agent' ? 'AI Peer' : config.agent_compatibility === 'openclaw' ? 'Sender Peer' : 'Honcho Peer ID'">Honcho Peer ID</div>
+                        <div class="field-description"
+                            x-text="config.agent_compatibility === 'hermes-agent' ? 'Hermes-Agent aiPeer (the AI-side peer name).' : config.agent_compatibility === 'openclaw' ? 'Sender ID→peer mapping for OpenClaw.' : 'The peer identifier for this workspace.'">The peer identifier for this workspace.</div>
                     </div>
                     <div class="field-control">
                         <input type="text" x-model="config.honcho_peer_id" />
@@ -182,10 +182,10 @@
 
                 <div class="field">
                     <div class="field-label">
-                        <div class="field-title">Current Agent ID</div>
-                        <div class="field-description">
-                            Unique identifier for this Agent Zero instance.
-                        </div>
+                        <div class="field-title"
+                            x-text="config.agent_compatibility === 'hermes-agent' ? 'User Peer' : config.agent_compatibility === 'openclaw' ? 'Owner Peer' : 'Current Agent ID'">Current Agent ID</div>
+                        <div class="field-description"
+                            x-text="config.agent_compatibility === 'hermes-agent' ? 'Hermes-Agent peerName (the stable user peer).' : config.agent_compatibility === 'openclaw' ? 'OpenClaw owner peer ID.' : 'Unique identifier for this Agent Zero instance.'">Unique identifier for this Agent Zero instance.</div>
                     </div>
                     <div class="field-control">
                         <input type="text" x-model="config.agent_id" />
@@ -199,7 +199,7 @@
                         <div class="field-description">
                             Adjusts metadata and filtering to match another agent's Honcho conventions.
                             <br><b>Agent Zero:</b> Full metadata tagging and agent_id filtering.
-                            <br><b>Hermes-Agent:</b> Uses aiPeer as storage peer, skips metadata filtering (no agent_id tags).
+                            <br><b>Hermes-Agent:</b> Dual peers (user/ai), no custom metadata, uses aiPeer as storage peer.
                             <br><b>OpenClaw:</b> Sender_id→peer mapping, no custom metadata.
                         </div>
                     </div>
