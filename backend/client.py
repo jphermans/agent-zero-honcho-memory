@@ -187,10 +187,23 @@ class HonchoClient:
 
         Args:
             skip_filters: If True, ignore metadata filters (Hermes/OpenClaw compatibility).
+
+        Falls back to unfiltered search when Honcho rejects unknown filter columns
+        (e.g., agent_id on messages stored by Hermes or OpenClaw).
         """
         session = self.get_or_create_session(session_id, peer_id)
         effective_filters = filters if not skip_filters else None
-        return session.search(query=query, filters=effective_filters, limit=limit)
+        try:
+            return session.search(query=query, filters=effective_filters, limit=limit)
+        except Exception as e:
+            err_msg = str(e)
+            # If Honcho rejects a filter column, retry without filters
+            if "not allowed to be filtered" in err_msg or "does not exist" in err_msg:
+                logger.warning(
+                    f"Honcho filter rejected, retrying without filters: {err_msg}"
+                )
+                return session.search(query=query, filters=None, limit=limit)
+            raise
 
     def get_session_messages(
         self,
