@@ -22,6 +22,7 @@
 ---
 
 > **🤖 This plugin was entirely written by the AI assistant Agent Zero (A0).**
+> **👥 Contributors:** JPHsystems and Agent Zero
 
 ## ✨ Features
 
