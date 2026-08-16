@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.0.6] - 2026-08-16
+
+### Added
+- Settings-page `Write Test Message` and `Read Test Message` actions.
+- `write_test_message` API handler: writes a timestamped `Honcho test from A0` marker to the dedicated `a0-plugin-test` session.
+- `read_test_message` API handler: retrieves the newest test marker and cleans up the dedicated test session.
+- `backend/test_message.py` helpers for deterministic test content, detection, and latest-message extraction.
+
+### Changed
+- Updated plugin version to 0.0.6.
+
+## [0.0.5] - 2026-08-15
+
+### Added
+- Loopback-only `reload_backend` API endpoint to refresh plugin backend modules in-place without restarting Agent Zero.
+
+## [0.0.4] - 2026-08-15
+
+### Added
+- Automatic shared-memory storage (`auto_store`) through a new `monologue_end` lifecycle extension.
+- Transparent SSH local-forward fallback when the configured Honcho host is not directly routable.
+- Plugin-level `hooks.py` that normalizes effective configuration and resolves secret aliases at runtime.
+
+### Fixed
+- Explicit `honcho_memory_store` requests were incorrectly rejected because role-based privacy flags were applied to manual storage.
+- `allowed_agent_ids` could remain empty while `allowed_agent_ids_string` was populated in multi-agent mode.
+- Honcho filter rejection now fallback-retries without filters for message retrieval as well as search.
+
 ## [0.0.3] - 2026-07-21
 
 ### Changed

@@ -58,11 +58,16 @@ class HonchoAutoRetrieval(Extension):
             )
 
             # Build filters based on multi-agent mode and compatibility
-            from usr.plugins.honcho_shared_memory.backend.memory import _is_delegated_mode
+            from usr.plugins.honcho_shared_memory.backend.memory import (
+                _is_delegated_mode,
+            )
+
             filters = {}
             is_delegated = _is_delegated_mode(set)
             if not is_delegated:
-                if set.get("multi_agent_mode") and set.get("include_shared_agent_memories"):
+                if set.get("multi_agent_mode") and set.get(
+                    "include_shared_agent_memories"
+                ):
                     allowed = set.get("allowed_agent_ids", [])
                     current = set.get("agent_id", "agent-zero-0")
                     if current not in allowed:

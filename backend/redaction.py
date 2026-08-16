@@ -4,9 +4,10 @@ Never log or store raw credentials, tokens, or connection strings.
 """
 
 import re
+from typing import Callable
 
 # Patterns for redaction (case-insensitive)
-REDACT_PATTERNS = [
+REDACT_PATTERNS: list[tuple[re.Pattern[str], str | Callable[[re.Match[str]], str]]] = [
     (
         re.compile(
             r"(?i)authorization\s*[:=]\s*.+$",
@@ -102,12 +103,19 @@ def contains_likely_secret(text: str) -> bool:
 
     lower = text.lower()
     secret_indicators = [
-        "api_key=", "apikey=", "api-key=", "api-key:",
-        "password=", "password:",
-        "token=", "token:",
-        "secret=", "secret:",
+        "api_key=",
+        "apikey=",
+        "api-key=",
+        "api-key:",
+        "password=",
+        "password:",
+        "token=",
+        "token:",
+        "secret=",
+        "secret:",
         "authorization:",
         "bearer ",
-        "-----begin", "-----end",
+        "-----begin",
+        "-----end",
     ]
     return any(ind in lower for ind in secret_indicators)

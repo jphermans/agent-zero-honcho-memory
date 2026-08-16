@@ -28,10 +28,12 @@ def validate_url(url: str, permitted_schemes=None) -> str:
         permitted_schemes = {"http", "https"}
 
     if parsed.scheme not in permitted_schemes:
-        raise ValidationError(f"Unsupported URL scheme: {parsed.scheme}. Use http or https.")
+        raise ValidationError(
+            f"Unsupported URL scheme: {parsed.scheme}. Use http or https."
+        )
 
     # Reject control characters
-    if re.search(r'[\x00-\x1f\x7f]', url):
+    if re.search(r"[\x00-\x1f\x7f]", url):
         raise ValidationError("URL contains control characters")
 
     # Reject local file schemes
@@ -62,15 +64,17 @@ def validate_identifier(value: str, field_name: str) -> str:
     if not value:
         raise ValidationError(f"{field_name} cannot be empty")
 
-    if re.search(r'[\x00-\x1f\x7f]', value):
+    if re.search(r"[\x00-\x1f\x7f]", value):
         raise ValidationError(f"{field_name} contains control characters")
 
-    if re.search(r'\s', value):
+    if re.search(r"\s", value):
         raise ValidationError(f"{field_name} contains whitespace")
 
     # Allow common identifier characters
-    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', value):
-        raise ValidationError(f"{field_name} contains invalid characters (only a-z, A-Z, 0-9, _, -, . allowed)")
+    if not re.match(r"^[a-zA-Z0-9_\-\.]+$", value):
+        raise ValidationError(
+            f"{field_name} contains invalid characters (only a-z, A-Z, 0-9, _, -, . allowed)"
+        )
 
     return value
 

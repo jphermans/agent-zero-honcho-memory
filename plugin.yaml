@@ -1,7 +1,7 @@
 name: honcho_shared_memory
 title: Honcho Shared Memory
 description: Shared persistent memory for Agent Zero through a self-hosted Honcho database with single-agent and multi-agent modes.
-version: 0.0.3
+version: 0.0.6
 settings_sections:
   - agent
 per_project_config: true

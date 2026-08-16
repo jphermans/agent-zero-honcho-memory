@@ -62,6 +62,69 @@
             }
         },
 
+        async writeTestMessage() {
+            window._honcho.toastFrontendWarning('Writing test message...', 'Honcho');
+            try {
+                const res = await window._honcho.fetchApi('/api/plugins/honcho_shared_memory/write_test_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!res) {
+                    window._honcho.toastFrontendError('No response from server. Check plugin is enabled and settings saved.', 'Honcho');
+                    return;
+                }
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    window._honcho.toastFrontendError('Server error ' + res.status + (text ? ': ' + text.slice(0, 200) : ''), 'Honcho');
+                    return;
+                }
+                const data = await res.json();
+                if (!data) {
+                    window._honcho.toastFrontendError('Empty response from server.', 'Honcho');
+                    return;
+                }
+                if (data.success) {
+                    window._honcho.toastFrontendSuccess(data.message || 'Test message written', 'Honcho');
+                } else {
+                    window._honcho.toastFrontendError(data.message || 'Write test failed', 'Honcho');
+                }
+            } catch (e) {
+                window._honcho.toastFrontendError('Write test error: ' + (e.message || 'Unknown error'), 'Honcho');
+            }
+        },
+
+        async readTestMessage() {
+            window._honcho.toastFrontendWarning('Reading test message...', 'Honcho');
+            try {
+                const res = await window._honcho.fetchApi('/api/plugins/honcho_shared_memory/read_test_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!res) {
+                    window._honcho.toastFrontendError('No response from server. Check plugin is enabled and settings saved.', 'Honcho');
+                    return;
+                }
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    window._honcho.toastFrontendError('Server error ' + res.status + (text ? ': ' + text.slice(0, 200) : ''), 'Honcho');
+                    return;
+                }
+                const data = await res.json();
+                if (!data) {
+                    window._honcho.toastFrontendError('Empty response from server.', 'Honcho');
+                    return;
+                }
+                if (data.success) {
+                    alert(data.content || data.message);
+                    window._honcho.toastFrontendSuccess(data.message || 'Test message shown and cleaned up', 'Honcho');
+                } else {
+                    window._honcho.toastFrontendError(data.message || 'Read test failed', 'Honcho');
+                }
+            } catch (e) {
+                window._honcho.toastFrontendError('Read test error: ' + (e.message || 'Unknown error'), 'Honcho');
+            }
+        },
+
         viewDiagnostics() {
             if (this.diagnostics) {
                 const diagText = JSON.stringify(this.diagnostics, null, 2);
@@ -227,8 +290,10 @@
 
                 <!-- Actions -->
                 <div class="section-title">Actions</div>
-                <div class="field" style="display:flex; gap:10px;">
+                <div class="field" style="display:flex; gap:10px; flex-wrap:wrap;">
                     <button class="btn btn-field" @click="testConnection()">Test Connection</button>
+                    <button class="btn btn-field" @click="writeTestMessage()">Write Test Message</button>
+                    <button class="btn btn-field" @click="readTestMessage()">Read Test Message</button>
                     <button class="btn btn-field" @click="viewDiagnostics()">View Diagnostics</button>
                     <button class="btn btn-field" @click="resetDefaults()">Reset to Defaults</button>
                 </div>

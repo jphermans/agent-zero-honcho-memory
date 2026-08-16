@@ -2,13 +2,15 @@
 
 import pytest
 from usr.plugins.honcho_shared_memory.backend.validation import (
-    validate_url, validate_identifier, validate_int_range, validate_agent_ids,
+    validate_url,
+    validate_identifier,
+    validate_int_range,
+    validate_agent_ids,
 )
 from usr.plugins.honcho_shared_memory.backend.exceptions import ValidationError
 
 
 class TestValidateURL:
-
     def test_simple_url(self):
         assert validate_url("http://example.com:8000") == "http://example.com:8000"
 
@@ -36,7 +38,6 @@ class TestValidateURL:
 
 
 class TestValidateIdentifier:
-
     def test_simple_id(self):
         assert validate_identifier("my-workspace", "name") == "my-workspace"
 
@@ -60,7 +61,6 @@ class TestValidateIdentifier:
 
 
 class TestValidateIntRange:
-
     def test_valid(self):
         assert validate_int_range(5, 1, 10, "timeout") == 5
 
@@ -78,7 +78,6 @@ class TestValidateIntRange:
 
 
 class TestValidateAgentIDs:
-
     def test_empty_list(self):
         validate_agent_ids([], "agent-zero-0")  # should not raise
 

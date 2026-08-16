@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.3-blue?style=flat-square" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-0.0.6-blue?style=flat-square" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/Agent%20Zero-%E2%9C%94%EF%B8%8F%20compatible-4285F4?style=flat-square" alt="Agent Zero compatible"/>
   <img src="https://img.shields.io/badge/python-3.12%2B-purple?style=flat-square" alt="Python 3.12+"/>

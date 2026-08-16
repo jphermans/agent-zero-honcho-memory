@@ -2,6 +2,8 @@
 
 import logging
 from typing import Optional, Dict, Any, List
+
+from helpers.secrets import get_secrets_manager
 from honcho import Honcho
 from honcho import (
     APIError,
@@ -16,9 +18,19 @@ from honcho import (
 )
 
 from usr.plugins.honcho_shared_memory.backend.exceptions import (
-    AuthenticationError, ConnectionError, TimeoutError,
-    WorkspaceNotFoundError, PeerNotFoundError, APICompatibilityError,
-    RateLimitError, ConfigurationError,
+    AuthenticationError,
+    ConnectionError,
+    TimeoutError,
+    WorkspaceNotFoundError,
+    PeerNotFoundError,
+    APICompatibilityError,
+    RateLimitError,
+    ConfigurationError,
+)
+from usr.plugins.honcho_shared_memory.backend.tunnel import (
+    SshTunnel,
+    endpoint_reachable,
+    split_base_url,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,12 +55,59 @@ class HonchoClient:
         self._api_key = api_key
         self._client: Optional[Honcho] = None
         self._tls_verify = tls_verify
+        self._tunnel = None
+        self._route_ensured = False
+        self.effective_base_url = base_url
+
+    def _ensure_route(self) -> None:
+        """Choose a direct route or fall back to an SSH local-forward.
+
+        The configured URL is never modified. When it is a non-loopback host
+        that cannot be reached directly, an SSH tunnel to the same host is
+        started once and used transparently for the lifetime of this client.
+        """
+        if self._route_ensured:
+            return
+        self._route_ensured = True
+
+        host, port, loopback = split_base_url(self.base_url)
+        if loopback or not host or endpoint_reachable(host, port, timeout=1.5):
+            self.effective_base_url = self.base_url
+            self._tunnel = None
+            return
+
+        try:
+            secrets = get_secrets_manager().load_secrets()
+            ssh_user = secrets.get("AUTH_LOGIN", "") or ""
+            ssh_password = secrets.get("AUTH_PASSWORD", "") or ""
+            if not ssh_user or not ssh_password:
+                self.effective_base_url = self.base_url
+                self._tunnel = None
+                return
+
+            tunnel = SshTunnel(
+                target_host=host,
+                target_port=port,
+                ssh_host=secrets.get("SSH_TUNNEL_HOST") or host,
+                ssh_port=22,
+                ssh_user=ssh_user,
+                ssh_password=ssh_password,
+            )
+            self.effective_base_url = tunnel.start()
+            self._tunnel = tunnel
+        except Exception as exc:
+            logger.warning(
+                "Honcho SSH-tunnel fallback failed; using direct URL: %s", exc
+            )
+            self.effective_base_url = self.base_url
+            self._tunnel = None
 
     def _get_client(self) -> Honcho:
         if self._client is None:
+            self._ensure_route()
             self._client = Honcho(
                 api_key=self._api_key,
-                base_url=self.base_url,
+                base_url=self.effective_base_url,
                 workspace_id=self.workspace_id,
                 timeout=self.timeout,
                 max_retries=self.max_retries,
@@ -56,10 +115,11 @@ class HonchoClient:
             # Disable TLS verification if requested
             if not self._tls_verify:
                 import httpx
+
                 http_client = httpx.Client(verify=False)
                 self._client = Honcho(
                     api_key=self._api_key,
-                    base_url=self.base_url,
+                    base_url=self.effective_base_url,
                     workspace_id=self.workspace_id,
                     timeout=self.timeout,
                     max_retries=self.max_retries,
@@ -109,7 +169,9 @@ class HonchoClient:
             # 4. Try basic write (temporary)
             session = client.session(id="__test_session__")
             msgs = session.add_messages(
-                messages=[{"peer_id": "__test_peer__", "content": "plugin connection test"}]
+                messages=[
+                    {"peer_id": "__test_peer__", "content": "plugin connection test"}
+                ]
             )
             diag["write"] = "ok"
             # 5. Try read
@@ -214,6 +276,22 @@ class HonchoClient:
         reverse: bool = True,
         filters: Optional[Dict[str, Any]] = None,
     ):
-        """Retrieve messages from a session."""
+        """Retrieve messages from a session.
+
+        Falls back to unfiltered retrieval when Honcho rejects unknown filter columns.
+        """
         session = self.get_or_create_session(session_id, peer_id)
-        return session.messages(filters=filters, page=page, size=size, reverse=reverse)
+        try:
+            return session.messages(
+                filters=filters, page=page, size=size, reverse=reverse
+            )
+        except Exception as e:
+            err_msg = str(e)
+            if "not allowed to be filtered" in err_msg or "does not exist" in err_msg:
+                logger.warning(
+                    f"Honcho filter rejected on messages(), retrying without filters: {err_msg}"
+                )
+                return session.messages(
+                    filters=None, page=page, size=size, reverse=reverse
+                )
+            raise

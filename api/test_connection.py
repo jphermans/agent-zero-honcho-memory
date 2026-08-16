@@ -8,7 +8,6 @@ from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 
 
 class TestConnectionHandler(ApiHandler):
-
     async def process(self, input: dict, request) -> dict:
         """Test connectivity to the configured Honcho server."""
         config = get_plugin_config("honcho_shared_memory")
@@ -22,7 +21,7 @@ class TestConnectionHandler(ApiHandler):
         if not password:
             return {
                 "success": False,
-                "message": "Secret HONCHO_DB_PASSWORD is not configured. Please set it in Agent Zero secrets."
+                "message": "Secret HONCHO_DB_PASSWORD is not configured. Please set it in Agent Zero secrets.",
             }
 
         try:

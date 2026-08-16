@@ -5,13 +5,14 @@ from helpers import plugins
 from helpers.secrets import get_secrets_manager
 from usr.plugins.honcho_shared_memory.backend.client import HonchoClient
 from usr.plugins.honcho_shared_memory.backend.memory import (
-    is_memory_worthy, generate_metadata, sanitize_for_storage,
+    is_storeable_content,
+    generate_metadata,
+    sanitize_for_storage,
 )
 from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 
 
 class HonchoMemoryStore(Tool):
-
     async def execute(
         self,
         content="",
@@ -35,10 +36,11 @@ class HonchoMemoryStore(Tool):
         if not content or not content.strip():
             return Response(message="No content to store.", break_loop=False)
 
-        # Check worthiness
-        if not is_memory_worthy(content, "assistant", set):
+        # Check whether explicit content is safe to store. Do not apply
+        # role-based auto-store flags to an explicit save request.
+        if not is_storeable_content(content, set):
             return Response(
-                message="Content was filtered: either too short, trivial, or contains secrets.",
+                message="Content was filtered: it is empty, too long, or contains a likely secret.",
                 break_loop=False,
             )
 

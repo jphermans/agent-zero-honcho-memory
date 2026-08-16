@@ -5,7 +5,6 @@ from helpers.secrets import get_secrets_manager
 
 
 class SecretStatusHandler(ApiHandler):
-
     @classmethod
     def get_methods(cls):
         return ["GET"]
@@ -18,4 +17,7 @@ class SecretStatusHandler(ApiHandler):
         if password:
             return {"configured": True, "message": "Secret is configured."}
         else:
-            return {"configured": False, "message": "Secret HONCHO_DB_PASSWORD is not set."}
+            return {
+                "configured": False,
+                "message": "Secret HONCHO_DB_PASSWORD is not set.",
+            }

@@ -9,7 +9,6 @@ from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 
 
 class HonchoMemoryContext(Tool):
-
     async def execute(
         self,
         query="",
@@ -29,7 +28,9 @@ class HonchoMemoryContext(Tool):
             )
 
         if not query or not query.strip():
-            return Response(message="No query provided for context retrieval.", break_loop=False)
+            return Response(
+                message="No query provided for context retrieval.", break_loop=False
+            )
 
         secrets = get_secrets_manager()
         all_secrets = secrets.load_secrets()

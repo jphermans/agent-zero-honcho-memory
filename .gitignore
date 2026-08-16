@@ -40,3 +40,6 @@ config.json
 config.local.*
 settings.local.*
 test-results/
+
+# Local plugin enable/disable state
+.toggle-*

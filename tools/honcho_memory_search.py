@@ -9,7 +9,6 @@ from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 
 
 class HonchoMemorySearch(Tool):
-
     async def execute(
         self,
         query="",

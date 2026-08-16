@@ -1,7 +1,10 @@
 """Unit tests for agent compatibility mode (Hermes-Agent and OpenClaw)."""
 
 import pytest
-from usr.plugins.honcho_shared_memory.backend.memory import _is_delegated_mode, generate_metadata
+from usr.plugins.honcho_shared_memory.backend.memory import (
+    _is_delegated_mode,
+    generate_metadata,
+)
 
 
 class TestIsDelegatedMode:

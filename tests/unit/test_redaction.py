@@ -2,12 +2,13 @@
 
 import pytest
 from usr.plugins.honcho_shared_memory.backend.redaction import (
-    redact_text, redact_headers, contains_likely_secret,
+    redact_text,
+    redact_headers,
+    contains_likely_secret,
 )
 
 
 class TestRedactText:
-
     def test_redact_authorization(self):
         text = "Authorization: Bearer abc123"
         result = redact_text(text)
@@ -37,7 +38,6 @@ class TestRedactText:
 
 
 class TestRedactHeaders:
-
     def test_redact_authorization(self):
         headers = {"Authorization": "Bearer abc123", "Content-Type": "application/json"}
         result = redact_headers(headers)
@@ -49,7 +49,6 @@ class TestRedactHeaders:
 
 
 class TestContainsLikelySecret:
-
     def test_api_key(self):
         assert contains_likely_secret("api_key=abc123") is True
 
