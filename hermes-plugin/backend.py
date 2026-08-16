@@ -336,7 +336,10 @@ class HonchoClient:
             diag["workspace"] = self.workspace_id
             peer = client.peer(id="__test_peer__")
             diag["peer"] = "ok"
-            session = client.session(id="__test_session__")
+            # Unique session per run: avoids stale-cache conflicts with
+            # previously deleted test sessions.
+            session_id = f"__test_session__{datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
+            session = client.session(id=session_id, peers=[peer])
             msgs = session.add_messages(
                 messages=[{"peer_id": "__test_peer__", "content": "plugin connection test"}]
             )
