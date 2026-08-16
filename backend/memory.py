@@ -9,7 +9,7 @@ from usr.plugins.honcho_shared_memory.backend.redaction import (
     redact_text,
 )
 
-PLUGIN_VERSION = "0.0.6"
+PLUGIN_VERSION = "0.0.7"
 
 
 def is_memory_worthy(content: str, role: str, config: dict) -> bool:

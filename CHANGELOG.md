@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.7] - 2026-08-16
+
+### Fixed
+- Fixed write/read test-message actions that failed with `Session a0-plugin-test not found` after the first cleanup by using a unique timestamped test session ID for every write and selecting/deleting only the newest dedicated test session; production and Hermes Agent sessions are never touched.
+- Updated plugin version to 0.0.7.
+
 ## [0.0.6] - 2026-08-16
 
 ### Added

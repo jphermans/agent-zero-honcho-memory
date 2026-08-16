@@ -6,8 +6,8 @@ from helpers.secrets import get_secrets_manager
 from usr.plugins.honcho_shared_memory.backend.client import HonchoClient
 from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 from usr.plugins.honcho_shared_memory.backend.test_message import (
-    TEST_SESSION_ID,
     extract_latest_test_content,
+    find_latest_test_session,
 )
 
 
@@ -37,23 +37,33 @@ class ReadTestMessageHandler(ApiHandler):
                 max_retries=config.get("max_retries", 3),
                 tls_verify=config.get("tls_verify", True),
             )
-            session = client.client.session(id=TEST_SESSION_ID)
-            page = session.messages(reverse=True, size=50)
-            messages = list(getattr(page, "items", page) or [])
-            content = extract_latest_test_content(messages)
-
-            if content is None:
+            page = client.client.sessions(reverse=True, size=100)
+            sessions = list(getattr(page, "items", page) or [])
+            test_session = find_latest_test_session(sessions)
+            if test_session is None:
                 return {
                     "success": False,
                     "message": "No test message found. Use Write Test Message first.",
                     "cleaned_up": False,
                 }
 
-            # Honcho SDK has no single-message delete; removing the dedicated
-            # test session is the safest cleanup and cannot touch production data.
+            session_id = getattr(test_session, "id", "") or ""
+            page = test_session.messages(reverse=True, size=50)
+            messages = list(getattr(page, "items", page) or [])
+            content = extract_latest_test_content(messages)
+
+            if content is None:
+                return {
+                    "success": False,
+                    "message": "No test message found in selected test session.",
+                    "cleaned_up": False,
+                }
+
+            # Remove only the selected dedicated test session. Production
+            # sessions such as default/host data are never considered here.
             cleaned_up = False
             try:
-                session.delete()
+                test_session.delete()
                 cleaned_up = True
             except Exception:
                 # Cleanup failure must not fail the user-facing read action.
@@ -62,7 +72,8 @@ class ReadTestMessageHandler(ApiHandler):
             return {
                 "success": True,
                 "message": "Test message retrieved.",
-                "session_id": TEST_SESSION_ID,
+                "session_id": session_id,
+                "cleanup_session_id": session_id,
                 "content": content,
                 "cleaned_up": cleaned_up,
             }

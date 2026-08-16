@@ -26,8 +26,10 @@ class FakeMessage:
 
 
 class FakeSession:
-    def __init__(self, messages):
-        self._messages = messages
+    def __init__(self, id, created_at, messages=None):
+        self.id = id
+        self.created_at = created_at
+        self._messages = messages or []
         self.deleted = False
 
     def messages(self, **kwargs):
@@ -38,18 +40,35 @@ class FakeSession:
         self.deleted = True
 
 
+class FakePage:
+    def __init__(self, items):
+        self.items = items
+
+
 class FakeHonchoApi:
-    def __init__(self, session):
+    def __init__(self, sessions=None, session=None):
+        self._sessions = sessions or []
         self._session = session
+        self.sessions_called = False
+
+    def sessions(self, **kwargs):
+        self.sessions_called = True
+        self.sessions_kwargs = kwargs
+        return FakePage(self._sessions)
 
     def session(self, id):
-        return self._session
+        if self._session is not None:
+            return self._session
+        for candidate in self._sessions:
+            if candidate.id == id:
+                return candidate
+        return None
 
 
 class FakeHonchoClient:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
-        self.client = FakeHonchoApi(None)
+        self.client = FakeHonchoApi()
         self.written = []
 
     def add_messages(self, session_id, peer_id, messages, skip_metadata=False):
@@ -97,7 +116,7 @@ def patch_environment(monkeypatch, config=None):
 
 
 class TestWriteTestMessageHandler:
-    def test_write_uses_dedicated_session_and_fixed_prefix(self, monkeypatch):
+    def test_write_uses_dynamic_test_session_and_fixed_prefix(self, monkeypatch):
         patch_environment(monkeypatch)
         fake_client = FakeHonchoClient()
         monkeypatch.setattr(
@@ -110,9 +129,11 @@ class TestWriteTestMessageHandler:
 
         assert result["success"] is True
         assert result["test_id"] == "msg-1"
+        assert result["session_id"].startswith("a0-plugin-test-")
+        assert result["session_id"] != "a0-plugin-test"
         assert len(fake_client.written) == 1
         item = fake_client.written[0]
-        assert item["session_id"] == "a0-plugin-test"
+        assert item["session_id"] == result["session_id"]
         assert item["messages"][0]["content"].startswith("Honcho test from A0")
         assert item["skip_metadata"] is True
 
@@ -134,16 +155,25 @@ class TestWriteTestMessageHandler:
 
 
 class TestReadTestMessageHandler:
-    def test_read_latest_test_message_and_cleanup(self, monkeypatch):
+    def test_read_latest_test_session_and_cleanup_only_that_session(self, monkeypatch):
         patch_environment(monkeypatch)
-        session = FakeSession(
-            [
-                FakeMessage("old", "Honcho test from A0 — 2026-08-15T10:00:00+00:00"),
-                FakeMessage("new", "Honcho test from A0 — 2026-08-16T03:17:00+00:00"),
-            ]
+        older = FakeSession(
+            "a0-plugin-test-20260816100000000000",
+            "2026-08-16T10:00:00+00:00",
+            [FakeMessage("old", "Honcho test from A0 — old")],
+        )
+        newer = FakeSession(
+            "a0-plugin-test-20260816110000000000",
+            "2026-08-16T11:00:00+00:00",
+            [FakeMessage("new", "Honcho test from A0 — new")],
+        )
+        production = FakeSession(
+            "default",
+            "2026-08-16T12:00:00+00:00",
+            [FakeMessage("prod", "important production memory")],
         )
         fake_client = FakeHonchoClient()
-        fake_client.client = FakeHonchoApi(session)
+        fake_client.client = FakeHonchoApi(sessions=[older, newer, production])
         monkeypatch.setattr(
             "usr.plugins.honcho_shared_memory.api.read_test_message.HonchoClient",
             lambda **kwargs: fake_client,
@@ -153,15 +183,22 @@ class TestReadTestMessageHandler:
         result = asyncio.run(handler.process({}, None))
 
         assert result["success"] is True
-        assert result["content"] == "Honcho test from A0 — 2026-08-16T03:17:00+00:00"
+        assert result["content"] == "Honcho test from A0 — new"
+        assert result["cleanup_session_id"] == newer.id
         assert result["cleaned_up"] is True
-        assert session.deleted is True
+        assert newer.deleted is True
+        assert older.deleted is False
+        assert production.deleted is False
 
-    def test_no_test_message_returns_safe_error(self, monkeypatch):
+    def test_no_test_session_returns_safe_error(self, monkeypatch):
         patch_environment(monkeypatch)
-        session = FakeSession([FakeMessage("x", "regular message")])
+        production = FakeSession(
+            "default",
+            "2026-08-16T12:00:00+00:00",
+            [FakeMessage("x", "regular message")],
+        )
         fake_client = FakeHonchoClient()
-        fake_client.client = FakeHonchoApi(session)
+        fake_client.client = FakeHonchoApi(sessions=[production])
         monkeypatch.setattr(
             "usr.plugins.honcho_shared_memory.api.read_test_message.HonchoClient",
             lambda **kwargs: fake_client,
@@ -172,3 +209,4 @@ class TestReadTestMessageHandler:
 
         assert result["success"] is False
         assert "no test message" in result["message"].lower()
+        assert production.deleted is False

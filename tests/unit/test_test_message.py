@@ -3,9 +3,11 @@
 from datetime import datetime, timezone
 
 from usr.plugins.honcho_shared_memory.backend.test_message import (
-    TEST_SESSION_ID,
+    TEST_SESSION_PREFIX,
     build_test_message_content,
+    build_test_session_id,
     extract_latest_test_content,
+    find_latest_test_session,
     is_test_message,
 )
 
@@ -84,6 +86,68 @@ class TestExtractLatestTestContent:
         )
 
 
-class TestTestSessionId:
-    def test_stable_dedicated_session_id(self):
-        assert TEST_SESSION_ID == "a0-plugin-test"
+class TestBuildTestSessionId:
+    def test_session_id_uses_dedicated_prefix(self):
+        stamp = datetime(2026, 8, 16, 13, 30, 38, tzinfo=timezone.utc)
+        session_id = build_test_session_id(stamp)
+        assert session_id.startswith(TEST_SESSION_PREFIX)
+        assert session_id == "a0-plugin-test-20260816133038000000"
+
+    def test_different_timestamps_produce_different_ids(self):
+        first = build_test_session_id(
+            datetime(2026, 8, 16, 13, 30, 38, tzinfo=timezone.utc)
+        )
+        second = build_test_session_id(
+            datetime(2026, 8, 16, 13, 30, 39, tzinfo=timezone.utc)
+        )
+        assert first != second
+
+    def test_prefix_never_equals_legacy_fixed_session(self):
+        assert TEST_SESSION_PREFIX != "a0-plugin-test"
+
+
+class TestFindLatestTestSession:
+    class FakeSession:
+        def __init__(self, id, created_at):
+            self.id = id
+            self.created_at = created_at
+
+    def test_returns_newest_test_session_only(self):
+        older = self.FakeSession(
+            "a0-plugin-test-20260816130000000000",
+            "2026-08-16T13:00:00+00:00",
+        )
+        newer = self.FakeSession(
+            "a0-plugin-test-20260816130100000000",
+            datetime(2026, 8, 16, 13, 1, 0, tzinfo=timezone.utc),
+        )
+        assert find_latest_test_session([older, newer]) is newer
+
+    def test_ignores_production_and_hermes_sessions(self):
+        normal = self.FakeSession(
+            "default",
+            "2026-08-16T14:00:00+00:00",
+        )
+        hermes = self.FakeSession(
+            "agent-main-discord-thread-1234",
+            "2026-08-16T15:00:00+00:00",
+        )
+        assert find_latest_test_session([normal, hermes]) is None
+
+    def test_ignores_legacy_fixed_test_session(self):
+        legacy = self.FakeSession("a0-plugin-test", "2026-08-16T15:00:00+00:00")
+        assert find_latest_test_session([legacy]) is None
+
+    def test_handles_dict_sessions(self):
+        sessions = [
+            {
+                "id": "a0-plugin-test-20260816130000000000",
+                "created_at": "2026-08-16T13:00:00+00:00",
+            },
+            {
+                "id": "a0-plugin-test-20260816130100000000",
+                "created_at": "2026-08-16T13:01:00+00:00",
+            },
+        ]
+        result = find_latest_test_session(sessions)
+        assert result["id"] == "a0-plugin-test-20260816130100000000"

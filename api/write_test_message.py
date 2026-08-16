@@ -6,8 +6,8 @@ from helpers.secrets import get_secrets_manager
 from usr.plugins.honcho_shared_memory.backend.client import HonchoClient
 from usr.plugins.honcho_shared_memory.backend.redaction import redact_text
 from usr.plugins.honcho_shared_memory.backend.test_message import (
-    TEST_SESSION_ID,
     build_test_message_content,
+    build_test_session_id,
 )
 
 
@@ -37,9 +37,10 @@ class WriteTestMessageHandler(ApiHandler):
                 max_retries=config.get("max_retries", 3),
                 tls_verify=config.get("tls_verify", True),
             )
+            session_id = build_test_session_id()
             content = build_test_message_content()
             created = client.add_messages(
-                session_id=TEST_SESSION_ID,
+                session_id=session_id,
                 peer_id=config.get("honcho_peer_id", "default"),
                 messages=[{"content": content}],
                 skip_metadata=True,
@@ -52,7 +53,7 @@ class WriteTestMessageHandler(ApiHandler):
             return {
                 "success": True,
                 "message": "Test message written.",
-                "session_id": TEST_SESSION_ID,
+                "session_id": session_id,
                 "test_id": test_id,
                 "content": content,
             }
