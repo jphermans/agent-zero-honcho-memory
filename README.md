@@ -187,6 +187,27 @@ When using Hermes-Agent or OpenClaw mode, **metadata filtering is disabled** so 
 
 ---
 
+## 🟣 Hermes Agent plugin
+
+This repo also ships the **Hermes Agent counterpart** in [`hermes-plugin/`](hermes-plugin/README.md) — the same shared memory, but as a native Hermes plugin (tools the agent can call during conversation).
+
+- Same workspace / peer / session conventions → **memory is shared with Agent Zero automatically**.
+- Hermes writes minimal `hermes-agent` metadata, which this plugin reads natively.
+- Requires `honcho-ai>=2.0.0` in the Hermes virtualenv and the plugin enabled via `hermes plugins enable honcho-shared-memory`.
+- Full install / config / usage guide: [`hermes-plugin/README.md`](hermes-plugin/README.md)
+
+| Hermes tool | Purpose |
+|-------------|---------|
+| `honcho_test_connection` | Verify connectivity + write/read |
+| `honcho_store` | Store a memory |
+| `honcho_search` | Semantic search over memories |
+| `honcho_context` | Retrieve relevant context |
+| `honcho_latest` | List most recent stored messages |
+
+No OpenAI/LLM API key is needed for storage and search on a self-hosted Honcho — only if you want Honcho's own derived (dialectic) features.
+
+---
+
 ## 🔐 Security
 
 | Protection | Status |

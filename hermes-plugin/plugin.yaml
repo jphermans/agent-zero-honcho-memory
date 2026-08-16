@@ -1,0 +1,19 @@
+name: honcho-shared-memory
+description: "Shared persistent memory for Hermes via a self-hosted Honcho server — same namespace as the Agent Zero honcho_shared_memory plugin."
+version: 0.0.7
+author: JPHsystems
+provides_tools:
+  - honcho_test_connection
+  - honcho_store
+  - honcho_search
+  - honcho_context
+  - honcho_latest
+platforms:
+  - cli
+  - gateway
+requires_env:
+  - HONCHO_BASE_URL
+  - HONCHO_WORKSPACE_ID
+  - HONCHO_PEER_ID
+  - HONCHO_AGENT_ID
+  - HONCHO_API_KEY
