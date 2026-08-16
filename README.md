@@ -70,14 +70,14 @@
 
 ```bash
 # In Agent Zero, go to Plugins → Install from Git:
-https://github.com/your-username/agent-zero-honcho-memory.git
+https://github.com/jphermans/agent-zero-honcho-memory.git
 ```
 
 ### Manual
 
 ```bash
 cd /a0/usr/plugins
-git clone https://github.com/your-username/agent-zero-honcho-memory.git honcho_shared_memory
+git clone https://github.com/jphermans/agent-zero-honcho-memory.git honcho_shared_memory
 ```
 
 Then **restart Agent Zero** to load the plugin.
