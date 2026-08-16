@@ -198,11 +198,11 @@ This repo also ships the **Hermes Agent counterpart** in [`hermes-plugin/`](herm
 
 | Hermes tool | Purpose |
 |-------------|---------|
-| `honcho_test_connection` | Verify connectivity + write/read |
-| `honcho_store` | Store a memory |
-| `honcho_search` | Semantic search over memories |
-| `honcho_context` | Retrieve relevant context |
-| `honcho_latest` | List most recent stored messages |
+| `honcho_memory_test` | Verify connectivity + write/read |
+| `honcho_memory_store` | Store a memory |
+| `honcho_memory_search` | Semantic search over memories |
+| `honcho_memory_context` | Retrieve relevant context |
+| `honcho_memory_latest` | List most recent stored messages |
 
 No OpenAI/LLM API key is needed for storage and search on a self-hosted Honcho — only if you want Honcho's own derived (dialectic) features.
 
