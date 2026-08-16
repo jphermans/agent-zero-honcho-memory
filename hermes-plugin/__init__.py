@@ -53,7 +53,7 @@ def _err(message: str, icon: str = "❌") -> str:
     return json.dumps({"success": False, "icon": icon, "error": redact_text(message)}, ensure_ascii=False)
 
 
-def honcho_test_connection() -> str:
+def honcho_memory_test() -> str:
     """Test the connection to the Honcho server. Returns diagnostics.
 
     Checks reachability, workspace access, and a temporary write/read cycle
@@ -86,7 +86,7 @@ def honcho_test_connection() -> str:
         return _err(str(exc))
 
 
-def honcho_store(
+def honcho_memory_store(
     content: str,
     memory_type: str = "memory",
     tags: Optional[str] = None,
@@ -159,7 +159,7 @@ def honcho_store(
         return _err(f"Failed to store memory: {exc}")
 
 
-def honcho_search(
+def honcho_memory_search(
     query: str,
     limit: Optional[int] = None,
     agent_filter: Optional[str] = None,
@@ -232,7 +232,7 @@ def honcho_search(
         return _err(f"Failed to search memories: {exc}")
 
 
-def honcho_context(
+def honcho_memory_context(
     query: str,
     limit: Optional[int] = None,
     agent_filter: Optional[str] = None,
@@ -240,7 +240,7 @@ def honcho_context(
 ) -> str:
     """Retrieve shared context from Honcho relevant to a topic.
 
-    Like honcho_search, but returns a context block designed to be injected
+    Like honcho_memory_search, but returns a context block designed to be injected
     into your working context before answering a question.
 
     Args:
@@ -301,7 +301,7 @@ def honcho_context(
         return _err(f"Failed to retrieve context: {exc}")
 
 
-def honcho_latest(limit: int = 5, session_filter: Optional[str] = None) -> str:
+def honcho_memory_latest(limit: int = 5, session_filter: Optional[str] = None) -> str:
     """List the most recent messages stored in the shared Honcho session.
 
     Useful to see what has been stored recently (by any compatible agent).

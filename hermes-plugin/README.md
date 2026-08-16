@@ -77,11 +77,11 @@ Then `/reset` (or exit and relaunch) so the tools load. The plugin's tools are *
 
 | Tool | Purpose |
 |------|---------|
-| `honcho_test_connection` | Verify reachability + workspace + write/read |
-| `honcho_store` | Explicitly store a memory |
-| `honcho_search` | Semantic search over stored memories |
-| `honcho_context` | Retrieve relevant context for a topic |
-| `honcho_latest` | List the most recent stored messages |
+| `honcho_memory_test` | Verify reachability + workspace + write/read |
+| `honcho_memory_store` | Explicitly store a memory |
+| `honcho_memory_search` | Semantic search over stored memories |
+| `honcho_memory_context` | Retrieve relevant context for a topic |
+| `honcho_memory_latest` | List the most recent stored messages |
 
 Just tell Hermes what you want in plain language — e.g. *"remember that the PF6000 runs firmware 2.1"*, *"what did we store about the PF6000?"*, *"check honcho memory for that decision"*.
 
